@@ -7,10 +7,8 @@
     <h1>PDF to Image Converter</h1>
     <input type="file" id="pdfFile" accept=".pdf">
     <button id="convertButton">Convert to Image</button>
-    <div id="imageContainer">
-        {% if image %}
-            <button id="downloadButton">Download Image</button>
-        {% endif %}
+    <div id="downloadButtonContainer" style="display: none;">
+        <button id="downloadButton">Download Image</button>
     </div>
 
     <script>
@@ -24,9 +22,11 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.text())
-                .then(html => {
-                    document.documentElement.innerHTML = html;
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    document.getElementById('downloadButton').href = url;
+                    document.getElementById('downloadButtonContainer').style.display = 'block';
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -36,14 +36,15 @@
             }
         });
 
-        document.addEventListener('click', function(event) {
-          if (event.target && event.target.id === 'downloadButton') {
-            const imageData = document.querySelector('button#downloadButton').parentElement.dataset.image;
-            const link = document.createElement('a');
-            link.href = 'data:image/jpeg;base64,' + imageData;
-            link.download = 'converted_image.jpg';
-            link.click();
-          }
+        document.getElementById('downloadButton').addEventListener('click', function() {
+            const url = document.getElementById('downloadButton').href;
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'converted_image.jpg';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
         });
     </script>
 </body>
