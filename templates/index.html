@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF to Image Converter</title>
+</head>
+<body>
+    <h1>PDF to Image Converter</h1>
+    <input type="file" id="pdfFile" accept=".pdf">
+    <button id="convertButton">Convert to Image</button>
+
+    <script>
+        document.getElementById('convertButton').addEventListener('click', function() {
+            const file = document.getElementById('pdfFile').files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('http://127.0.0.1:8000/pdf_to_image/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'converted_image.jpg';
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                alert('Please select a PDF file.');
+            }
+        });
+    </script>
+</body>
+</html>
