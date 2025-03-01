@@ -9,7 +9,6 @@
     <button id="convertButton">Convert to Image</button>
     <div id="imageContainer">
         {% if image %}
-            <img src="data:image/jpeg;base64,{{ image }}" alt="Converted Image">
             <button id="downloadButton">Download Image</button>
         {% endif %}
     </div>
@@ -39,9 +38,9 @@
 
         document.addEventListener('click', function(event) {
           if (event.target && event.target.id === 'downloadButton') {
-            const imageData = document.querySelector('img').src;
+            const imageData = document.querySelector('button#downloadButton').parentElement.dataset.image;
             const link = document.createElement('a');
-            link.href = imageData;
+            link.href = 'data:image/jpeg;base64,' + imageData;
             link.download = 'converted_image.jpg';
             link.click();
           }
