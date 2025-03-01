@@ -2,3 +2,4 @@ fastapi
 pdf2image
 pillow
 python-multipart
+jinja2

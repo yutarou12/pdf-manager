@@ -1,20 +1,20 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pdf2image import convert_from_bytes
-from PIL import Image
 import io
-import os
 
 app = FastAPI()
-
-# HTML テンプレートの設定
+app.mount(path="/static", app=StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
 
 # HTML ファイルを返すエンドポイント
 @app.get("/")
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
 
 @app.post("/pdf_to_image/")
 async def pdf_to_image(request: Request, file: UploadFile = File(...)):
