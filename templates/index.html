@@ -7,6 +7,12 @@
     <h1>PDF to Image Converter</h1>
     <input type="file" id="pdfFile" accept=".pdf">
     <button id="convertButton">Convert to Image</button>
+    <div id="imageContainer">
+        {% if image %}
+            <img src="data:image/jpeg;base64,{{ image }}" alt="Converted Image">
+            <button id="downloadButton">Download Image</button>
+        {% endif %}
+    </div>
 
     <script>
         document.getElementById('convertButton').addEventListener('click', function() {
@@ -19,16 +25,9 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.blob())
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'converted_image.jpg';
-                    a.style.display = 'none';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
+                .then(response => response.text())
+                .then(html => {
+                    document.documentElement.innerHTML = html;
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -36,6 +35,16 @@
             } else {
                 alert('Please select a PDF file.');
             }
+        });
+
+        document.addEventListener('click', function(event) {
+          if (event.target && event.target.id === 'downloadButton') {
+            const imageData = document.querySelector('img').src;
+            const link = document.createElement('a');
+            link.href = imageData;
+            link.download = 'converted_image.jpg';
+            link.click();
+          }
         });
     </script>
 </body>

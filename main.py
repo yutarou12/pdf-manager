@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pdf2image import convert_from_bytes
 from PIL import Image
@@ -35,8 +35,7 @@ async def pdf_to_image(request: Request, file: UploadFile = File(...)):
             # 画像データを base64 エンコード
             encoded_image = base64.b64encode(img_byte_arr.read()).decode()
 
-            # 画像データを StreamingResponse で返す (ダウンロード用)
-            return StreamingResponse(io.BytesIO(img_byte_arr.getvalue()), media_type="image/jpeg", headers={"Content-Disposition": "attachment; filename=converted_image.jpg"})
+            return templates.TemplateResponse("index.html", {"request": request, "image": encoded_image})
         else:
             raise HTTPException(status_code=500, detail="Failed to convert PDF to image.")
 
