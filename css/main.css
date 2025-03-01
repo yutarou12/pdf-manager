@@ -1,0 +1,13 @@
+#dropArea {
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+    padding: 50px;
+    text-align: center;
+    cursor: pointer;
+}
+#dropArea.active {
+    border-color: #666;
+}
+#fileName {
+    margin-top: 10px;
+}
