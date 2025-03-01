@@ -3,21 +3,73 @@
 <head>
     <title>PDF to Image Converter</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #dropArea {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 50px;
+            text-align: center;
+            cursor: pointer;
+        }
+        #dropArea.active {
+            border-color: #666;
+        }
+        #fileName {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body class="container mt-5">
     <h1 class="mb-4">PDF to Image Converter</h1>
-    <div class="form-group">
-        <input type="file" class="form-control-file" id="pdfFile" accept=".pdf">
+    <div id="dropArea" class="form-group">
+        <p>ここにファイルをドラッグ＆ドロップしてください</p>
+        <input type="file" id="pdfFile" accept=".pdf" style="display: none;">
+        <p id="fileName"></p>
     </div>
     <button id="convertButton" class="btn btn-primary mb-3">Convert to Image</button>
     <div id="downloadButtonContainer" style="display: none;">
-        <button id="downloadButton" class="btn btn-success mb-3">Download Image</button>
+        <button id="downloadButton" class="btn btn-success" >Download Image</button>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('pdfFile');
+        const fileNameDisplay = document.getElementById('fileName');
+        const downloadButton = document.getElementById('downloadButton');
+        const downloadButtonContainer = document.getElementById('downloadButtonContainer');
+
+        dropArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('active');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('active');
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('active');
+            fileInput.files = e.dataTransfer.files;
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = '選択されたファイル: ' + fileInput.files[0].name;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = '選択されたファイル: ' + fileInput.files[0].name;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        });
+
         document.getElementById('convertButton').addEventListener('click', function() {
             const file = document.getElementById('pdfFile').files[0];
             if (file) {
@@ -31,8 +83,8 @@
                 .then(response => response.blob())
                 .then(blob => {
                     const url = window.URL.createObjectURL(blob);
-                    document.getElementById('downloadButton').href = url;
-                    document.getElementById('downloadButtonContainer').style.display = 'block';
+                    downloadButton.href = url;
+                    downloadButtonContainer.style.display = 'block';
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -42,8 +94,9 @@
             }
         });
 
-        document.getElementById('downloadButton').addEventListener('click', function() {
-            const url = document.getElementById('downloadButton').href;
+        downloadButton.addEventListener('click', function(event) {
+            event.stopPropagation(); // イベント伝播を停止
+            const url = downloadButton.href;
             const a = document.createElement('a');
             a.href = url;
             a.download = 'converted_image.jpg';
@@ -51,6 +104,11 @@
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
+
+            // ダウンロード完了後の処理
+            fileInput.value = '';
+            fileNameDisplay.textContent = '';
+            downloadButtonContainer.style.display = 'none';
         });
     </script>
 </body>
