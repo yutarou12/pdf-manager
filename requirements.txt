@@ -3,3 +3,4 @@ pdf2image
 pillow
 python-multipart
 jinja2
+PyPDF2

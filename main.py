@@ -1,5 +1,9 @@
+import base64
+import os
+
+import PyPDF2
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pdf2image import convert_from_bytes
@@ -36,6 +40,37 @@ async def pdf_to_image(request: Request, file: UploadFile = File(...)):
             return StreamingResponse(io.BytesIO(img_byte_arr.getvalue()), media_type="image/jpeg", headers={"Content-Disposition": "attachment; filename=converted_image.jpg"})
         else:
             raise HTTPException(status_code=500, detail="Failed to convert PDF to image.")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@app.post("/compress_pdf/")
+async def compress_pdf(file: UploadFile = File(...)):
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Invalid file type. Only PDF files are allowed.")
+
+    try:
+        pdf_bytes = await file.read()
+        pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_bytes))
+        pdf_writer = PyPDF2.PdfWriter()
+
+        for page in pdf_reader.pages:
+            pdf_writer.add_page(page)
+
+        compressed_pdf_bytes = io.BytesIO()
+        pdf_writer.write(compressed_pdf_bytes)
+        compressed_pdf_bytes.seek(0)
+
+        # 元のファイル名を取得
+        original_filename, _ = os.path.splitext(file.filename)
+        compressed_filename = f"{original_filename}_compressed.pdf"
+
+        # ファイル名とファイルデータをJSON形式で返す
+        return JSONResponse({
+            "filename": compressed_filename,
+            "file_data": base64.b64encode(compressed_pdf_bytes.getvalue()).decode()
+        })
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

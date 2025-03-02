@@ -1,13 +1,13 @@
-#dropArea {
+#dropArea, #compressDropArea {
     border: 2px dashed #ccc;
     border-radius: 5px;
     padding: 50px;
     text-align: center;
     cursor: pointer;
 }
-#dropArea.active {
+#dropArea.active, #compressDropArea.active {
     border-color: #666;
 }
-#fileName {
+#fileName, #compressFileName {
     margin-top: 10px;
 }

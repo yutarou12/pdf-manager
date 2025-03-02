@@ -17,6 +17,18 @@
         <button id="downloadButton" class="btn btn-success" >Download Image</button>
     </div>
 
+    <div class="mt-4">
+        <div id="compressDropArea" class="form-group">
+            <p>圧縮するPDFファイルをドラッグ＆ドロップしてください</p>
+            <input type="file" id="compressPdfFile" accept=".pdf" style="display: none;">
+            <p id="compressFileName"></p>
+        </div>
+        <button id="compressButton" class="btn btn-warning mb-3">Compress PDF</button>
+        <div id="compressDownloadButtonContainer" style="display: none;">
+            <a id="compressDownloadButton" class="btn btn-info" download="compressed_pdf.pdf">Download Compressed PDF</a>
+        </div>
+    </div>
+
     <script src="/static/js/script.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>

@@ -76,3 +76,91 @@ downloadButton.addEventListener('click', function(event) {
     fileNameDisplay.textContent = '';
     downloadButtonContainer.style.display = 'none';
 });
+
+
+// PDF圧縮用のJavaScriptコード
+const compressDropArea = document.getElementById('compressDropArea');
+const compressPdfFile = document.getElementById('compressPdfFile');
+const compressFileNameDisplay = document.getElementById('compressFileName');
+const compressDownloadButton = document.getElementById('compressDownloadButton');
+const compressDownloadButtonContainer = document.getElementById('compressDownloadButtonContainer');
+
+compressDropArea.addEventListener('click', () => {
+    compressPdfFile.click();
+});
+
+compressDropArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    compressDropArea.classList.add('active');
+});
+
+compressDropArea.addEventListener('dragleave', () => {
+    compressDropArea.classList.remove('active');
+});
+
+compressDropArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    compressDropArea.classList.remove('active');
+    compressPdfFile.files = e.dataTransfer.files;
+    if (compressPdfFile.files.length > 0) {
+        compressFileNameDisplay.textContent = '選択されたファイル: ' + compressPdfFile.files[0].name;
+    } else {
+        compressFileNameDisplay.textContent = '';
+    }
+});
+
+compressPdfFile.addEventListener('change', () => {
+    if (compressPdfFile.files.length > 0) {
+        compressFileNameDisplay.textContent = '選択されたファイル: ' + compressPdfFile.files[0].name;
+    } else {
+        compressFileNameDisplay.textContent = '';
+    }
+});
+
+document.getElementById('compressButton').addEventListener('click', function() {
+    const file = document.getElementById('compressPdfFile').files[0];
+    if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('http://127.0.0.1:8000/compress_pdf/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            const blob = base64toBlob(data.file_data, 'application/pdf');
+            const url = window.URL.createObjectURL(blob);
+            compressDownloadButton.href = url;
+            compressDownloadButton.download = data.filename;
+            compressDownloadButtonContainer.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    } else {
+        alert('Please select a PDF file to compress.');
+    }
+});
+
+compressDownloadButton.addEventListener('click', function(event) {
+    event.stopPropagation();
+    compressPdfFile.value = '';
+    compressFileNameDisplay.textContent = '';
+    compressDownloadButtonContainer.style.display = 'none';
+});
+
+function base64toBlob(base64Data, contentType) {
+    const byteCharacters = atob(base64Data);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+    return new Blob(byteArrays, { type: contentType });
+}
