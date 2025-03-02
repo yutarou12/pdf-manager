@@ -46,10 +46,11 @@ document.getElementById('convertButton').addEventListener('click', function() {
             method: 'POST',
             body: formData
         })
-        .then(response => response.blob())
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            downloadButton.href = url;
+        .then(response => response.json())
+        .then(data => {
+            const blob = base64toBlob(data.file_data, 'application/pdf');
+            downloadButton.href = window.URL.createObjectURL(blob);
+            downloadButton.download = data.filename;
             downloadButtonContainer.style.display = 'block';
         })
         .catch(error => {
@@ -61,16 +62,7 @@ document.getElementById('convertButton').addEventListener('click', function() {
 });
 
 downloadButton.addEventListener('click', function(event) {
-    event.stopPropagation(); // イベント伝播を停止
-    const url = downloadButton.href;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'converted_image.jpg';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-
+    event.stopPropagation();
     // ダウンロード完了後の処理
     fileInput.value = '';
     fileNameDisplay.textContent = '';
@@ -130,8 +122,7 @@ document.getElementById('compressButton').addEventListener('click', function() {
         .then(response => response.json())
         .then(data => {
             const blob = base64toBlob(data.file_data, 'application/pdf');
-            const url = window.URL.createObjectURL(blob);
-            compressDownloadButton.href = url;
+            compressDownloadButton.href = window.URL.createObjectURL(blob);
             compressDownloadButton.download = data.filename;
             compressDownloadButtonContainer.style.display = 'block';
         })

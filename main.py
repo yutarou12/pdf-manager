@@ -36,8 +36,15 @@ async def pdf_to_image(request: Request, file: UploadFile = File(...)):
             img.save(img_byte_arr, format='JPEG')
             img_byte_arr.seek(0)
 
-            # 画像データを StreamingResponse で返す (ダウンロード用)
-            return StreamingResponse(io.BytesIO(img_byte_arr.getvalue()), media_type="image/jpeg", headers={"Content-Disposition": "attachment; filename=converted_image.jpg"})
+            # 元のファイル名を取得
+            original_filename, _ = os.path.splitext(file.filename)
+            convert_filename = f"{original_filename}.jpg"
+
+            # ファイル名とファイルデータをJSON形式で返す
+            return JSONResponse({
+                "filename": convert_filename,
+                "file_data": base64.b64encode(img_byte_arr.getvalue()).decode()
+            })
         else:
             raise HTTPException(status_code=500, detail="Failed to convert PDF to image.")
 
